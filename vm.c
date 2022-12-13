@@ -9,6 +9,7 @@ VM vm;
 static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define READ_CONSTANT_LONG() (vm.chunk->constants.values[READ_BYTE() + (READ_BYTE() << 8) + (READ_BYTE() << 16)])
 #define BINARY_OP(op) \
     do { \
         double b = pop(); \
@@ -32,6 +33,11 @@ static InterpretResult run() {
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
+                push(constant);
+                break;
+            }
+            case OP_CONSTANT_LONG: {
+                Value constant = READ_CONSTANT_LONG();
                 push(constant);
                 break;
             }
