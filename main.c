@@ -1,27 +1,35 @@
 #include "common.h"
 #include "chunk.h"
 #include "debug.h"
+#include "vm.h"
 
 int main(int argc, const char *argv[]) {
+    initVM();
     Chunk chunk;
     initChunk(&chunk);
 
-    for (int i = 0; i < 324; ++i) {
-        int constant = addConstant(&chunk, i);
-        if (constant >> 8) {
-            writeChunk(&chunk, OP_CONSTANT_LONG, i - i % 2);
-            writeChunk(&chunk, constant & 0xff, i - i % 2);
-            writeChunk(&chunk, (constant >> 8) & 0xff, i - i % 2);
-            writeChunk(&chunk, (constant >> 16) & 0xff, i - i % 2);
-        } else {
-            writeChunk(&chunk, OP_CONSTANT, i - i % 2);
-            writeChunk(&chunk, constant, i - i % 2);
-        }
-    }
-    writeChunk(&chunk, OP_RETURN, 325);
+    int constant = addConstant(&chunk, 1.2);
+    writeChunk(&chunk, OP_CONSTANT, 1);
+    writeChunk(&chunk, constant, 1);
 
-    disassembleChunk(&chunk, "test chunk");
-    
+    constant = addConstant(&chunk, 3.4);
+    writeChunk(&chunk, OP_CONSTANT, 1);
+    writeChunk(&chunk, constant, 1);
+
+    writeChunk(&chunk, OP_ADD, 2);
+
+    constant = addConstant(&chunk, 5.6);
+    writeChunk(&chunk, OP_CONSTANT, 3);
+    writeChunk(&chunk, constant, 3);
+
+    writeChunk(&chunk, OP_DIVIDE, 3);
+
+    writeChunk(&chunk, OP_NEGATE, 4);
+    writeChunk(&chunk, OP_RETURN, 4);
+
+    interpret(&chunk);
+
+    freeVM();
     freeChunk(&chunk);
     
     return 0;
