@@ -46,6 +46,7 @@ static void advance();
 static void expression();
 static void consume(TokenType type, const char *message);
 static void endCompiler();
+static ParseRule *getRule(TokenType type);
 
 bool compile(const char *source, Chunk *chunk) {
     initScanner(source);
@@ -145,23 +146,6 @@ static void endCompiler() {
 #endif 
 }
 
-static ParseRule *getRule(TokenType type);
-static void parsePrecedence(Precedence precedence);
-
-static void expression() {
-    parsePrecedence(PREC_ASSIGNMENT);
-}
-
-static void grouping() {
-    expression();
-    consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
-}
-
-static void number() {
-    double value = strtod(parser.previous.start, NULL);
-    emitConstant(NUMBER_VAL(value));
-}
-
 static void parsePrecedence(Precedence precedence) {
     advance();
     ParseFn prefix = getRule(parser.previous.type)->prefix;
@@ -176,6 +160,20 @@ static void parsePrecedence(Precedence precedence) {
         ParseFn infix = getRule(parser.previous.type)->infix;
         infix();
     }
+}
+
+static void expression() {
+    parsePrecedence(PREC_ASSIGNMENT);
+}
+
+static void grouping() {
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+}
+
+static void number() {
+    double value = strtod(parser.previous.start, NULL);
+    emitConstant(NUMBER_VAL(value));
 }
 
 static void unary() {

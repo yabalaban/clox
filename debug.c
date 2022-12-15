@@ -4,29 +4,9 @@
 #include "line.h"
 #include "value.h"
 
-static uint32_t constantInstruction(const char *name, Chunk *chunk, int offset) {
-    uint8_t constant = chunk->code[offset + 1];
-    printf("%-16s %4d '", name, constant);
-    printValue(chunk->constants.values[constant]);
-    printf("'\n");
-    return offset + 2;
-}
-
-static uint32_t constantLongInstruction(const char *name, Chunk *chunk, int offset) {
-    uint8_t l = chunk->code[offset + 1];
-    uint8_t m = chunk->code[offset + 2];
-    uint8_t h = chunk->code[offset + 3];
-    uint16_t constant = (h << 16) + (m << 8) + l;
-    printf("%-16s %4d '", name, constant);
-    printValue(chunk->constants.values[constant]);
-    printf("'\n");
-    return offset + 4;
-}
-
-static uint32_t simpleInstruction(const char *name, int offset) {
-    printf("%s\n", name);
-    return offset + 1;
-}
+static uint32_t constantInstruction(const char *name, Chunk *chunk, int offset);
+static uint32_t constantLongInstruction(const char *name, Chunk *chunk, int offset);
+static uint32_t simpleInstruction(const char *name, int offset);
 
 void disassembleChunk(Chunk *chunk, const char *name) {
     printf("== %s ==\n", name);
@@ -85,4 +65,28 @@ uint32_t disassembleInstruction(Chunk *chunk, uint32_t offset) {
             printf("Unknown opcode %d\n", instruction);
             return offset + 1;
     }
+}
+
+static uint32_t constantInstruction(const char *name, Chunk *chunk, int offset) {
+    uint8_t constant = chunk->code[offset + 1];
+    printf("%-16s %4d '", name, constant);
+    printValue(chunk->constants.values[constant]);
+    printf("'\n");
+    return offset + 2;
+}
+
+static uint32_t constantLongInstruction(const char *name, Chunk *chunk, int offset) {
+    uint8_t l = chunk->code[offset + 1];
+    uint8_t m = chunk->code[offset + 2];
+    uint8_t h = chunk->code[offset + 3];
+    uint16_t constant = (h << 16) + (m << 8) + l;
+    printf("%-16s %4d '", name, constant);
+    printValue(chunk->constants.values[constant]);
+    printf("'\n");
+    return offset + 4;
+}
+
+static uint32_t simpleInstruction(const char *name, int offset) {
+    printf("%s\n", name);
+    return offset + 1;
 }

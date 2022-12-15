@@ -13,10 +13,84 @@
 
 VM vm;
 
-static Value peek(int distance);
-static void runtimeError(const char *format, ...);
-static bool isFalsey(Value value);
-static void concatenate();
+static void resetStack();
+static InterpretResult run();
+
+void initVM() {
+    resetStack();
+    vm.objects = NULL;
+}
+
+void freeVM() {
+    freeObjects();
+}
+
+InterpretResult interpret(const char *source) {
+    Chunk chunk;
+    initChunk(&chunk);
+
+    if (!compile(source, &chunk)) {
+        freeChunk(&chunk);
+        return INTERPRET_COMPILE_ERROR;
+    };
+
+    vm.chunk = &chunk;
+    vm.ip = vm.chunk->code;
+
+    InterpretResult result = run();
+    freeChunk(&chunk);
+    
+    return result;
+}
+
+void push(Value value) {
+    *vm.stack_top = value;
+    vm.stack_top++;
+}
+
+Value pop() {
+    vm.stack_top--;
+    return *vm.stack_top;
+}
+
+static void resetStack() {
+    vm.stack_top = vm.stack;
+}
+
+static Value peek(int distance) {
+    return vm.stack_top[-1 - distance];
+}
+
+static void runtimeError(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fputs("\n", stderr);
+
+    uint32_t instruction = vm.ip - vm.chunk->code - 1;
+    uint32_t line = getLine(&vm.chunk->lines, instruction);
+    fprintf(stderr, "[line %d] in script\n", line);
+    resetStack();
+}
+
+static bool isFalsey(Value value) {
+    return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
+
+static void concatenate() {
+    ObjString *b = AS_STRING(pop());
+    ObjString *a = AS_STRING(pop());
+
+    int length = a->length + b->length;
+    char *chars = ALLOCATE(char, length + 1);
+    memcpy(chars, a->chars, a->length);
+    memcpy(chars + a->length, b->chars, b->length);
+    chars[length] = '\0';
+
+    ObjString *res = takeString(chars, length);
+    push(OBJ_VAL(res));
+}
 
 static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
@@ -106,78 +180,4 @@ static InterpretResult run() {
 #undef BINARY_OP
 }
 
-static void resetStack() {
-    vm.stack_top = vm.stack;
-}
 
-void initVM() {
-    resetStack();
-    vm.objects = NULL;
-}
-
-void freeVM() {
-    freeObjects();
-}
-
-InterpretResult interpret(const char *source) {
-    Chunk chunk;
-    initChunk(&chunk);
-
-    if (!compile(source, &chunk)) {
-        freeChunk(&chunk);
-        return INTERPRET_COMPILE_ERROR;
-    };
-
-    vm.chunk = &chunk;
-    vm.ip = vm.chunk->code;
-
-    InterpretResult result = run();
-    freeChunk(&chunk);
-    
-    return result;
-}
-
-void push(Value value) {
-    *vm.stack_top = value;
-    vm.stack_top++;
-}
-
-Value pop() {
-    vm.stack_top--;
-    return *vm.stack_top;
-}
-
-static Value peek(int distance) {
-    return vm.stack_top[-1 - distance];
-}
-
-static void runtimeError(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    vfprintf(stderr, format, args);
-    va_end(args);
-    fputs("\n", stderr);
-
-    uint32_t instruction = vm.ip - vm.chunk->code - 1;
-    uint32_t line = getLine(&vm.chunk->lines, instruction);
-    fprintf(stderr, "[line %d] in script\n", line);
-    resetStack();
-}
-
-static bool isFalsey(Value value) {
-    return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
-}
-
-static void concatenate() {
-    ObjString *b = AS_STRING(pop());
-    ObjString *a = AS_STRING(pop());
-
-    int length = a->length + b->length;
-    char *chars = ALLOCATE(char, length + 1);
-    memcpy(chars, a->chars, a->length);
-    memcpy(chars + a->length, b->chars, b->length);
-    chars[length] = '\0';
-
-    ObjString *res = takeString(chars, length);
-    push(OBJ_VAL(res));
-}
