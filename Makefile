@@ -4,7 +4,7 @@ DEPS = common.h
 ODIR = obj
 BDIR = bin
 
-_OBJ = chunk.o compiler.o debug.o line.o main.o memory.o object.o scanner.o value.o vm.o 
+_OBJ = chunk.o compiler.o debug.o line.o main.o memory.o object.o scanner.o table.o value.o vm.o 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.c $(DEPS)
