@@ -7,6 +7,7 @@
 static uint32_t constantInstruction(const char *name, Chunk *chunk, int offset);
 static uint32_t constantLongInstruction(const char *name, Chunk *chunk, int offset);
 static uint32_t simpleInstruction(const char *name, int offset);
+static uint32_t byteInstruction(const char *name, Chunk *chunk, int offset);
 
 void disassembleChunk(Chunk *chunk, const char *name) {
     printf("== %s ==\n", name);
@@ -43,6 +44,10 @@ uint32_t disassembleInstruction(Chunk *chunk, uint32_t offset) {
             return simpleInstruction("OP_FALSE", offset);
         case OP_POP:
             return simpleInstruction("OP_POP", offset);
+        case OP_GET_LOCAL:
+            return byteInstruction("OP_GET_LOCAL", chunk, offset);
+        case OP_SET_LOCAL:
+            return byteInstruction("OP_SET_LOCAL", chunk, offset);
         case OP_DEFINE_GLOBAL:
             return constantInstruction("OP_DEFINE_GLOBAL", chunk, offset);
         case OP_GET_GLOBAL:
@@ -99,4 +104,10 @@ static uint32_t constantLongInstruction(const char *name, Chunk *chunk, int offs
 static uint32_t simpleInstruction(const char *name, int offset) {
     printf("%s\n", name);
     return offset + 1;
+}
+
+static uint32_t byteInstruction(const char *name, Chunk *chunk, int offset) {
+    uint8_t slot = chunk->code[offset + 1];
+    printf("%-16s %4d\n", name, slot);
+    return offset + 2;
 }
