@@ -27,6 +27,15 @@ void freeObjects() {
 
 static void freeObject(Obj *obj) {
     switch (obj->type) {
+        case OBJ_FUNCTION: {
+            ObjFunction *function = (ObjFunction *)obj;
+            freeChunk(&function->chunk);
+            FREE(ObjFunction, obj);
+            break;
+        }
+        case OBJ_NATIVE: 
+            FREE(ObjNative, obj);
+            break;
         case OBJ_STRING: {
             ObjString *string = (ObjString *)obj;
             FREE_ARRAY(char, string->chars, string->length + 1);
