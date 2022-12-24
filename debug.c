@@ -8,6 +8,7 @@ static uint32_t constantInstruction(const char *name, Chunk *chunk, int offset);
 static uint32_t constantLongInstruction(const char *name, Chunk *chunk, int offset);
 static uint32_t simpleInstruction(const char *name, int offset);
 static uint32_t byteInstruction(const char *name, Chunk *chunk, int offset);
+static uint32_t jumpInstruction(const char *name, int sign, Chunk *chunk, int offset);
 
 void disassembleChunk(Chunk *chunk, const char *name) {
     printf("== %s ==\n", name);
@@ -74,6 +75,12 @@ uint32_t disassembleInstruction(Chunk *chunk, uint32_t offset) {
             return simpleInstruction("OP_NEGATE", offset);
         case OP_PRINT:
             return simpleInstruction("OP_PRINT", offset);
+        case OP_JUMP:
+            return jumpInstruction("OP_JUMP", 1, chunk, offset);
+        case OP_JUMP_IF_FALSE:
+            return jumpInstruction("OP_JUMP_IF_FALSE", 1, chunk, offset);
+        case OP_LOOP:
+            return jumpInstruction("OP_LOOP", -1, chunk, offset);
         case OP_RETURN:
             return simpleInstruction("OP_RETURN", offset);
         default:
@@ -110,4 +117,10 @@ static uint32_t byteInstruction(const char *name, Chunk *chunk, int offset) {
     uint8_t slot = chunk->code[offset + 1];
     printf("%-16s %4d\n", name, slot);
     return offset + 2;
+}
+
+static uint32_t jumpInstruction(const char *name, int sign, Chunk *chunk, int offset) {
+    uint16_t jump = (uint16_t)((chunk->code[offset + 1] << 8) | chunk->code[offset + 2]);
+    printf("%-16s %4d -> %d\n", name, offset, offset + 3 + sign * jump);
+    return offset + 3;
 }
