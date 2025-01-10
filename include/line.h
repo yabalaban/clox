@@ -10,14 +10,14 @@ typedef struct {
 
 typedef struct {
   int capacity;
-  int count; 
-  Line* lines;
+  int count;
+  Line *lines;
 } LineArray;
 
-void initLineArray(LineArray* array);
-void writeLineArray(LineArray* array, int line);
-void freeLineArray(LineArray* array);
+void initLineArray(LineArray *array);
+void writeLineArray(LineArray *array, int line);
+void freeLineArray(LineArray *array);
 
-int getLine(LineArray* array, size_t index);
+int getLine(LineArray *array, size_t index);
 
-#endif 
+#endif

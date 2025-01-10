@@ -36,6 +36,20 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 # Include dependency files
 -include $(DEPS)
 
+# Formatting 
+style:
+	@for src in $(HEADERS) ; do \
+		echo "Formatting $$src..." ; \
+		clang-format -i "$$src" ; \
+	done
+	@for src in $(SRCS) ; do \
+		echo "Formatting $$src..." ; \
+		clang-format -i "$$src" ; \
+	done
+	@echo "Done"
+
+.PHONY: style
+
 # Clean rules
 .PHONY: clean
 clean:
