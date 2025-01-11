@@ -92,10 +92,17 @@ static void emitByte(uint8_t byte) {
   writeChunk(currentChunk(), byte, parser.previous.line);
 }
 
+<<<<<<< HEAD
 // static void emitBytes(uint8_t byte1, uint8_t byte2) {
 //   emitByte(byte1);
 //   emitByte(byte2);
 // }
+=======
+//static void emitBytes(uint8_t byte1, uint8_t byte2) {
+//  emitByte(byte1);
+//  emitByte(byte2);
+//}
+>>>>>>> 1511d9ee792df87270e4ac0017008268a12a5eaa
 
 static void emitReturn() { emitByte(OP_RETURN); }
 
@@ -103,6 +110,7 @@ static void emitConstant(Value value) {
   writeConstant(compilingChunk, value, parser.previous.line);
 }
 
+<<<<<<< HEAD
 static void endCompiler() {
   emitReturn();
 #ifdef DEBUG_PRINT_CODE
@@ -110,6 +118,14 @@ static void endCompiler() {
     disassembleChunk(currentChunk(), "code");
   }
 #endif
+=======
+static void endCompiler() { emitReturn();
+  #ifdef DEBUG_PRINT_CODE 
+if (!parser.hadError) {
+    disassembleChunk(currentChunk(), "code");
+  }
+#endif 
+>>>>>>> 1511d9ee792df87270e4ac0017008268a12a5eaa
 }
 
 static void expression();
