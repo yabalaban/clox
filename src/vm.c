@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "vm.h"
 
@@ -76,10 +77,10 @@ void initVM() { initValueArray(&vm.stack); }
 
 void freeVM() { freeValueArray(&vm.stack); }
 
-InterpretResult interpret(Chunk *chunk) {
-  vm.chunk = chunk;
-  vm.ip = vm.chunk->code;
-  return run();
+InterpretResult interpret(char *source) {
+  compile(source);
+  run();
+  return INTERPRET_OK;
 }
 
 void push(Value value) { writeValueArray(&vm.stack, value); }
